@@ -1,4 +1,4 @@
-# SASSHI-chat app
+# SASSHI- Chat app
 
 <img src="https://pbs.twimg.com/media/FTq52q9UsAAtf_J?format=jpg&name=large"></img>
 
