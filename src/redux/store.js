@@ -1,8 +1,10 @@
 import { combineReducers, legacy_createStore as createStore } from "redux";
 import { userReducer } from "./users/userReducer";
+import { notifyReducer } from "./notifications/notificationReducer";
 
 const mainReducer = combineReducers({
-  user: userReducer,
+  userReducer,
+  notifyReducer,
 });
 
 export const store = createStore(

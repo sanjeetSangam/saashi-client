@@ -1,7 +1,7 @@
 import React from "react";
 
 import styled from "styled-components";
-import robot from "../assets/robota.gif";
+import robot from "../assets/robot.gif";
 
 export const Welcome = ({ currentUser }) => {
   return (
@@ -23,7 +23,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  background: #140501;
+  background: #320329;
 
   img {
     max-inline-size: 100%;

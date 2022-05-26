@@ -1,16 +1,33 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { ChatInput } from "./ChatInput";
 import axios from "axios";
-import { getAllMessagesRoute } from "../utils/APIroutes";
+import { ChatInput } from "./ChatInput";
+import { getAllMessagesRoute, host } from "../utils/APIroutes";
 import Avatar from "@mui/material/Avatar";
+
+import { useDispatch } from "react-redux";
 
 import { v4 as uuidv4 } from "uuid";
 
+// varibales to socket.io
+import { io } from "socket.io-client";
+import { addNotify } from "../redux/notifications/notificationAction";
+var socket, selectedChatCompare;
+
 export const ChatContainer = ({ currentChat, currentUser }) => {
   const [messages, setMessages] = useState([]);
-  const [arrivalMsg, setArrivalMsg] = useState(null);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   let scrollRef = useRef();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (currentUser) {
+      socket = io(host);
+      socket.emit("setup_user", currentUser);
+      socket.on("connection", () => setSocketConnected(true));
+    }
+  }, [currentUser]);
 
   const getAllMsg = async () => {
     let token = localStorage.getItem("saashi_token");
@@ -29,6 +46,7 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
         );
 
         setMessages(data);
+        socket.emit("join_chat", currentChat._id);
       } catch (err) {
         console.log(err);
       }
@@ -37,11 +55,32 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
 
   useEffect(() => {
     getAllMsg();
+    selectedChatCompare = currentChat;
   }, [currentChat]);
 
   useEffect(() => {
-    arrivalMsg && currentChat && setMessages([...messages, arrivalMsg]);
-  }, [arrivalMsg]);
+    if (currentChat) {
+      socket.on("recieve", (newMessage) => {
+        if (
+          !selectedChatCompare ||
+          selectedChatCompare._id !== newMessage.chat._id
+        ) {
+          // notification
+
+          let noti = [];
+
+          if (!noti.includes(newMessage)) {
+            setNotifications([newMessage, ...notifications]);
+            noti.push(newMessage);
+            dispatch(addNotify(noti));
+          }
+        } else {
+          console.log(newMessage);
+          setMessages([...messages, newMessage]);
+        }
+      });
+    }
+  });
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({
@@ -128,9 +167,9 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
           <ChatInput
             currentChat={currentChat}
             currentUser={currentUser}
-            setArrivalMsg={setArrivalMsg}
             setMessages={setMessages}
             messages={messages}
+            socket={socket}
           />
         </Container>
       )}

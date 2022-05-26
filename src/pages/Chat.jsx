@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
@@ -7,22 +6,27 @@ import { addChat, allChats, searchUsers } from "../utils/APIroutes";
 import { Contacts } from "../components/Contacts";
 import { Welcome } from "../components/Welcome";
 import { ChatContainer } from "../components/ChatContainer";
-
+import { IoMdNotifications } from "react-icons/io";
 import logo from "../assets/logo.svg";
-
 import { Avatar } from "@mui/material";
+import { io } from "socket.io-client";
+import { useSelector } from "react-redux";
+var selectedChatCompare;
 
 export const Chat = () => {
   const [contacts, setContacts] = useState([]);
   const [currentUser, setCurrentUser] = useState(undefined);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [isLoaded, setIsloaded] = useState(false);
-
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState(null);
   const [listOfUsers, setListOfUsers] = useState([]);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const navigate = useNavigate();
+  const notify = useSelector((store) => store.notifyReducer.notifications);
+
+  console.log(notify);
 
   // navigating to login if user is not logged in
   useEffect(() => {
@@ -126,6 +130,7 @@ export const Chat = () => {
         </div>
 
         <div className="search">
+          <IoMdNotifications />
           <button onClick={() => setShowSearch(true)}>Search User</button>
         </div>
       </div>
@@ -141,7 +146,11 @@ export const Chat = () => {
         {isLoaded && currentChat === undefined ? (
           <Welcome currentUser={currentUser} />
         ) : (
-          <ChatContainer currentChat={currentChat} currentUser={currentUser} />
+          <ChatContainer
+            selectedChatCompare={selectedChatCompare}
+            currentChat={currentChat}
+            currentUser={currentUser}
+          />
         )}
       </div>
 
@@ -226,10 +235,16 @@ const Container = styled.div`
 
     .search {
       height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 1.8rem;
+      color: #4e0eff;
+      cursor: pointer;
       button {
         height: 100%;
         padding: 0 1rem;
-        border-radius: 0 1.5rem 0 0;
+        border-radius: 0.5rem 1rem;
         border: none;
         outline: none;
         background: #4e0eff;
@@ -248,7 +263,7 @@ const Container = styled.div`
     background: var(--chat-page);
     display: grid;
     grid-template-columns: 25% 75%;
-    border-radius: 0 0 1.5rem 1.5rem;
+    border-radius: 0 0 1.5rem 0;
     overflow: hidden;
     box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
       rgba(0, 0, 0, 0.22) 0px 15px 12px;

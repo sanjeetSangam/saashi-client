@@ -14,22 +14,9 @@ export const Contacts = ({
   changeChat,
   listOfUsers,
 }) => {
-  const [currentUserName, setCurrentUserName] = useState(undefined);
-  const [currentUserImage, setCurrentUserImage] = useState(undefined);
-  const [currentUserFULLname, setCurrentUserFULLname] = useState("");
   const [currentSelected, setCurrentSelected] = useState(undefined);
-
   const [groupName, setGroupName] = useState("");
-
   const [showAddGroup, setShowAddGroup] = useState(false);
-
-  useEffect(() => {
-    if (currentUser) {
-      setCurrentUserImage(currentUser.avatarImage);
-      setCurrentUserName(currentUser.username);
-      setCurrentUserFULLname(currentUser.first_name);
-    }
-  }, [currentUser]);
 
   const changeCurrentChat = (index, contact) => {
     setCurrentSelected(index);
@@ -43,7 +30,7 @@ export const Contacts = ({
 
   return (
     <>
-      {currentUserImage && currentUserName && (
+      {currentUser && (
         <Container>
           <div className="brand">
             <button onClick={() => setShowAddGroup(true)}>
@@ -106,13 +93,13 @@ export const Contacts = ({
             <div className="avatar">
               <Avatar
                 alt=""
-                src={currentUserImage}
+                src={currentUser.avatarImage}
                 sx={{ width: 40, height: 40 }}
               />
             </div>
 
             <div className="username">
-              <h2>{currentUserFULLname}</h2>
+              <h2>{currentUser.first_name}</h2>
             </div>
 
             <Logout />
@@ -175,7 +162,7 @@ const Container = styled.div`
   display: grid;
   grid-template-rows: 10% 80% 10%;
   overflow: hidden;
-  background: #498aa8;
+  background: #074d6e;
   /* position: relative; */
 
   .brand {
@@ -207,6 +194,7 @@ const Container = styled.div`
       gap: 1rem;
       cursor: pointer;
       padding: 0.8rem 1rem;
+      border-radius: 1rem 0;
     }
   }
 
@@ -223,7 +211,7 @@ const Container = styled.div`
     }
 
     .contact {
-      background: #5555;
+      background: #ffffffbd;
       min-height: 4rem;
       width: 90%;
       cursor: pointer;
@@ -242,7 +230,8 @@ const Container = styled.div`
 
       .username {
         h3 {
-          color: white;
+          color: #2d0404;
+          text-transform: capitalize;
         }
       }
     }
@@ -251,6 +240,12 @@ const Container = styled.div`
       background: #0b0827;
       box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px,
         rgba(0, 0, 0, 0.22) 0px 10px 10px;
+
+      .username {
+        h3 {
+          color: white;
+        }
+      }
     }
   }
 

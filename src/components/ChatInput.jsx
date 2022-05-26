@@ -7,36 +7,19 @@ import { BsEmojiSmileFill } from "react-icons/bs";
 
 import mp3 from "../assets/mp3.mp3";
 
-import { host, sendMessageRoute } from "../utils/APIroutes";
-import { io } from "socket.io-client";
+import { sendMessageRoute } from "../utils/APIroutes";
 import axios from "axios";
-const socket = io.connect(host);
 
 export const ChatInput = ({
   currentChat,
   currentUser,
-  setArrivalMsg,
   setMessages,
   messages,
+  socket,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [msg, setMsg] = useState("");
   const [audio] = useState(new Audio(mp3));
-
-  useEffect(() => {
-    if (currentChat) {
-      socket.on("recieve", (data) => {
-        setArrivalMsg(data);
-        audio.play();
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentChat) {
-      socket.emit("join_chat", currentChat._id);
-    }
-  }, [currentChat]);
 
   const handleSendMessage = async (event) => {
     event.preventDefault();
@@ -58,9 +41,7 @@ export const ChatInput = ({
 
     socket.emit("send_msg", data);
 
-    const msgs = [...messages];
-    msgs.push(data);
-    setMessages(msgs);
+    setMessages([...messages, data]);
     setShowEmojiPicker(false);
     setMsg("");
   };
