@@ -1,31 +1,89 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useState } from "react";
 import styled from "styled-components";
-
-import { Logout } from "./Logout";
 import Avatar from "@mui/material/Avatar";
+import { IoClose } from "react-icons/io5";
+import axios from "axios";
+import { addGroups } from "../utils/APIroutes";
 
-import { BiGroup } from "react-icons/bi";
-import { GrClose } from "react-icons/gr";
+import group from "../assets/group.png";
 
 export const Contacts = ({
   contacts,
   currentUser,
   changeChat,
   listOfUsers,
+  setListOfUsers,
+  showAddGroup,
+  setShowAddGroup,
+  searchChat,
+  setSearch,
+  setContacts,
+  setCurrentChat,
 }) => {
   const [currentSelected, setCurrentSelected] = useState(undefined);
   const [groupName, setGroupName] = useState("");
-  const [showAddGroup, setShowAddGroup] = useState(false);
+  const [groupPeople, setGroupPeople] = useState([]);
 
   const changeCurrentChat = (index, contact) => {
     setCurrentSelected(index);
     changeChat(contact);
   };
 
-  const addGroup = async (e) => {
-    e.preventDefault();
-    console.log(groupName);
+  const addPeopleToGroup = (user, index) => {
+    if (!groupPeople.includes(user)) {
+      setGroupPeople([...groupPeople, user]);
+    }
+  };
+
+  const removefromList = (user) => {
+    // console.log(user);
+
+    let allLists = groupPeople;
+    let lists = listOfUsers;
+
+    let newList = allLists.filter((list) => {
+      return list._id !== user._id;
+    });
+
+    let newLists = lists.filter((list) => {
+      return list._id !== user._id;
+    });
+
+    setListOfUsers(newLists);
+    setGroupPeople(newList);
+  };
+
+  const addGroupToChat = async () => {
+    let token = localStorage.getItem("saashi_token");
+    console.log(token);
+    try {
+      // let addingGroupData = ;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      setCurrentChat("");
+      setGroupPeople([]);
+      setShowAddGroup(false);
+      let { data } = await axios.post(
+        addGroups,
+        {
+          name: groupName,
+          users: JSON.stringify(groupPeople.map((u) => u._id)),
+        },
+        config
+      );
+
+      console.log(data);
+      setContacts([data, ...contacts]);
+      //
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -33,9 +91,7 @@ export const Contacts = ({
       {currentUser && (
         <Container>
           <div className="brand">
-            <button onClick={() => setShowAddGroup(true)}>
-              Add Group <BiGroup />{" "}
-            </button>
+            <h3>Chats</h3>
           </div>
 
           <div className="contacts">
@@ -53,7 +109,7 @@ export const Contacts = ({
                       <div className="avatar">
                         <Avatar
                           alt=""
-                          src="https://www.pngitem.com/pimgs/m/58-587137_group-of-people-in-a-formation-free-icon.png"
+                          src={group}
                           sx={{ width: 45, height: 45 }}
                         />
                       </div>
@@ -89,33 +145,19 @@ export const Contacts = ({
               })}
           </div>
 
-          <div className="current-user">
-            <div className="avatar">
-              <Avatar
-                alt=""
-                src={currentUser.avatarImage}
-                sx={{ width: 40, height: 40 }}
-              />
-            </div>
-
-            <div className="username">
-              <h2>{currentUser.first_name}</h2>
-            </div>
-
-            <Logout />
-          </div>
-
           {showAddGroup && (
             <div className="addGroup">
-              <form onSubmit={addGroup}>
-                <button
-                  onClick={() => setShowAddGroup(false)}
-                  className="close"
-                >
-                  {<GrClose />}
-                </button>
+              <form onSubmit={searchChat}>
                 <div className="group">
                   <h2>Create a new Group </h2>
+                  <button
+                    onClick={() => {
+                      setShowAddGroup(false);
+                    }}
+                    className="close"
+                  >
+                    <IoClose />
+                  </button>
                 </div>
 
                 <input
@@ -125,15 +167,24 @@ export const Contacts = ({
                   onChange={(e) => setGroupName(e.target.value)}
                 />
 
+                <input
+                  type="text"
+                  name="group"
+                  placeholder="Search and add users"
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+
+                <button>Search Users</button>
+
                 <div className="lists">
                   {listOfUsers.length > 0 &&
                     listOfUsers.map((user, index) => {
                       return (
                         <div
-                          key={user._id}
+                          key={index}
                           className="list"
                           onClick={() => {
-                            // addChatToList(user, index);
+                            addPeopleToGroup(user, index);
                           }}
                         >
                           <Avatar
@@ -141,14 +192,41 @@ export const Contacts = ({
                             src={user.avatarImage}
                             sx={{ width: 35, height: 35 }}
                           />
-
-                          <h4>{user.first_name + " " + user.last_name}</h4>
                         </div>
                       );
                     })}
                 </div>
 
-                <button>Create Group</button>
+                {groupPeople && (
+                  <h3>
+                    {groupPeople.length === 0
+                      ? "Add Members in Group"
+                      : "Added in group"}
+                  </h3>
+                )}
+                <div className="groupPeople">
+                  {groupPeople &&
+                    groupPeople.map((user) => {
+                      return (
+                        <div
+                          onClick={() => removefromList(user)}
+                          className="list_of_user"
+                          key={user._id}
+                        >
+                          <h4>{user.first_name}</h4>
+                          <IoClose />
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <button
+                  onClick={() => {
+                    addGroupToChat();
+                  }}
+                >
+                  Create Group
+                </button>
               </form>
             </div>
           )}
@@ -160,41 +238,20 @@ export const Contacts = ({
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 10% 80% 10%;
+  grid-template-rows: 10% 90%;
   overflow: hidden;
-  background: #074d6e;
+  background: #202c33;
+  border-right: 0.01px solid #404040;
   /* position: relative; */
 
   .brand {
     display: flex;
     align-items: center;
-    flex-direction: column;
     justify-content: center;
-    gap: 1rem;
-    background: #0d0d30;
-
-    img {
-      height: 2rem;
-    }
 
     h3 {
       color: white;
       text-transform: uppercase;
-    }
-
-    button {
-      background: white;
-      border: none;
-      color: black;
-      font-size: 1rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      cursor: pointer;
-      padding: 0.8rem 1rem;
-      border-radius: 1rem 0;
     }
   }
 
@@ -205,13 +262,13 @@ const Container = styled.div`
     overflow: auto;
     gap: 0.8rem;
     padding-top: 0.7rem;
+    background: #111b21;
 
     &::-webkit-scrollbar {
       display: none;
     }
 
     .contact {
-      background: #ffffffbd;
       min-height: 4rem;
       width: 90%;
       cursor: pointer;
@@ -220,26 +277,22 @@ const Container = styled.div`
       gap: 1rem;
       display: flex;
       align-items: center;
-      transition: 0.3s ease-in-out;
+      transition: 0.1s ease-in-out;
 
       &:hover {
-        background: gray;
-        box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
-          rgba(0, 0, 0, 0.23) 0px 6px 6px;
+        background: #354854;
       }
 
       .username {
         h3 {
-          color: #2d0404;
+          color: #f3ecec;
           text-transform: capitalize;
         }
       }
     }
 
     .selected {
-      background: #0b0827;
-      box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px,
-        rgba(0, 0, 0, 0.22) 0px 10px 10px;
+      background: #2a3942;
 
       .username {
         h3 {
@@ -284,28 +337,38 @@ const Container = styled.div`
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    color: white;
+    background: #14242f;
+    border-radius: 2rem;
+    padding: 3rem 5rem;
+    z-index: 1000;
 
     form {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
-      background: var(--form-color);
-      border-radius: 2rem;
-      padding: 3rem 5rem;
+      gap: 1rem;
       max-height: 50vh;
+      max-width: 400px;
 
-      .close {
-        background: none;
-        &:hover {
+      .group {
+        display: flex;
+        button {
           background: none;
+          position: absolute;
+          right: 1rem;
+          top: 1rem;
+          color: white;
+          &:hover {
+            background: none;
+          }
         }
       }
 
       input {
         background: transparent;
-        padding: 1rem;
+        padding: 0.5rem;
         border: 0.1rem solid #4e0eff;
-        color: black;
+        color: #ffffff;
         width: 100%;
         font-size: 1rem;
         border-radius: 1rem 0;
@@ -315,31 +378,31 @@ const Container = styled.div`
           outline: none;
         }
       }
+    }
 
-      button {
-        background: #997af0;
-        color: white;
-        padding: 1rem 2rem;
-        cursor: pointer;
-        font-weight: bold;
-        text-transform: uppercase;
-        border-radius: 1rem 0;
-        font-size: 1rem;
-        transition: 0.5s ease-in-out;
-        border: transparent;
+    button {
+      background: #997af0;
+      color: white;
+      padding: 0.5rem;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 1rem 0;
+      /* font-size: 1rem; */
+      transition: 0.5s ease-in-out;
+      border: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-        &:hover {
-          background: #4e0eff;
-        }
+      &:hover {
+        background: #4e0eff;
       }
     }
 
     .lists {
-      /* margin-top: 2rem; */
       display: flex;
-      flex-direction: column;
       gap: 1rem;
-
       overflow: auto;
       max-height: 50vh;
       &::-webkit-scrollbar {
@@ -350,18 +413,24 @@ const Container = styled.div`
         display: flex;
         align-items: center;
         gap: 1rem;
-        padding: 0.7rem 2rem;
-        background: #010325;
         color: white;
-        border-radius: 0.5rem;
         cursor: pointer;
         transition: 0.2s ease-in-out;
-
-        &:hover {
-          background: gray;
-          color: #010325;
-        }
       }
     }
+  }
+
+  .groupPeople {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 0.5rem;
+  }
+
+  .list_of_user {
+    display: flex;
+    background: white;
+    color: #111b21;
+    padding: 0.5rem;
   }
 `;

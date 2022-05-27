@@ -8,6 +8,7 @@ export const allUsersRoute = `${host}/api/auth/allusers`;
 export const allChats = `${host}/api/chat`;
 export const addChat = `${host}/api/chat`;
 export const searchUsers = `${host}/api/auth`;
+export const addGroups = `${host}/api/chat/group`
 
 // for messages
 export const sendMessageRoute = `${host}/api/messages/addmsg`;

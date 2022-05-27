@@ -9,8 +9,10 @@ import { ChatContainer } from "../components/ChatContainer";
 import { IoMdNotifications } from "react-icons/io";
 import logo from "../assets/logo.svg";
 import { Avatar } from "@mui/material";
-import { io } from "socket.io-client";
-import { useSelector } from "react-redux";
+import { Logout } from "../components/Logout";
+import { FiSearch } from "react-icons/fi";
+import { BiGroup } from "react-icons/bi";
+import { IoClose } from "react-icons/io5";
 var selectedChatCompare;
 
 export const Chat = () => {
@@ -21,12 +23,9 @@ export const Chat = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState(null);
   const [listOfUsers, setListOfUsers] = useState([]);
-  const [socketConnected, setSocketConnected] = useState(false);
+  const [showAddGroup, setShowAddGroup] = useState(false);
 
   const navigate = useNavigate();
-  const notify = useSelector((store) => store.notifyReducer.notifications);
-
-  console.log(notify);
 
   // navigating to login if user is not logged in
   useEffect(() => {
@@ -77,6 +76,8 @@ export const Chat = () => {
   const searchUser = async (e) => {
     e.preventDefault();
 
+    console.log("data");
+
     let token = localStorage.getItem("saashi_token");
 
     try {
@@ -90,7 +91,10 @@ export const Chat = () => {
         `${searchUsers}?search=${search}`,
         config
       );
-      setListOfUsers(data);
+
+      if (!listOfUsers.includes(data)) {
+        setListOfUsers(data, ...listOfUsers);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -114,7 +118,9 @@ export const Chat = () => {
         config
       );
 
-      getChats();
+      if (!contacts.find((c) => c._id === data._id)) {
+        setContacts([data, ...contacts]);
+      }
       setShowSearch(false);
     } catch (err) {
       console.log(err);
@@ -127,11 +133,20 @@ export const Chat = () => {
         <div className="brand">
           <img src={logo} alt="LOGO" />
           <h2>SAASHI</h2>
+
+          <button className="search" onClick={() => setShowSearch(true)}>
+            <FiSearch />
+          </button>
+
+          <button onClick={() => setShowAddGroup(true)}>
+            <BiGroup />{" "}
+          </button>
         </div>
 
         <div className="search">
           <IoMdNotifications />
-          <button onClick={() => setShowSearch(true)}>Search User</button>
+          <Logout />
+          <Avatar src={currentUser && currentUser.avatarImage} />
         </div>
       </div>
 
@@ -141,6 +156,13 @@ export const Chat = () => {
           currentUser={currentUser}
           changeChat={handleChatChange}
           listOfUsers={listOfUsers}
+          setListOfUsers={setListOfUsers}
+          showAddGroup={showAddGroup}
+          setShowAddGroup={setShowAddGroup}
+          searchChat={searchUser}
+          setSearch={setSearch}
+          setContacts={setContacts}
+          setCurrentChat={setCurrentChat}
         />
 
         {isLoaded && currentChat === undefined ? (
@@ -154,22 +176,31 @@ export const Chat = () => {
         )}
       </div>
 
-      {showSearch ? (
+      {showSearch && (
         <div className="search_box">
-          <button onClick={() => setShowSearch(false)}>close</button>
-
-          <form onSubmit={searchUser}>
+          <form
+            onSubmit={(e) => {
+              searchUser(e);
+            }}
+          >
             <div className="title">
               <h3>Search User</h3>
+
+              <button className="close" onClick={() => setShowSearch(false)}>
+                {" "}
+                <IoClose />
+              </button>
             </div>
 
             <input
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
               type="text"
               placeholder="Enter UserName"
             />
 
-            <button>Search</button>
+            <button type="submit">Search</button>
           </form>
 
           <div className="lists">
@@ -195,8 +226,6 @@ export const Chat = () => {
               })}
           </div>
         </div>
-      ) : (
-        ""
       )}
     </Container>
   );
@@ -214,9 +243,9 @@ const Container = styled.div`
 
   .navbar {
     padding: 1rem;
-    color: #130101;
-    width: 85vw;
-    background: #ffff;
+    color: #fefefe;
+    width: 90vw;
+    background: #202c33;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -231,6 +260,20 @@ const Container = styled.div`
       img {
         height: 2rem;
       }
+
+      button {
+        font-size: 1rem;
+        padding: 0.5rem;
+        border-radius: 50%;
+        border: none;
+        outline: none;
+        background: #f7f5fa;
+        cursor: pointer;
+        color: #0b062c;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     }
 
     .search {
@@ -239,27 +282,17 @@ const Container = styled.div`
       align-items: center;
       gap: 1rem;
       font-size: 1.8rem;
-      color: #4e0eff;
-      cursor: pointer;
+      color: #e8e7ec;
+
       button {
-        height: 100%;
-        padding: 0 1rem;
-        border-radius: 0.5rem 1rem;
-        border: none;
-        outline: none;
-        background: #4e0eff;
         cursor: pointer;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
       }
     }
   }
 
   .container {
     height: 85vh;
-    width: 85vw;
+    width: 90vw;
     background: var(--chat-page);
     display: grid;
     grid-template-columns: 25% 75%;
@@ -279,28 +312,35 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: var(--form-color);
+    background: #14242f;
     border-radius: 2rem;
     padding: 3rem 5rem;
-
-    button {
-      width: max-content;
-    }
+    color: white;
 
     form {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
-      /* background: var(--form-color);
-      border-radius: 2rem;
-      padding: 3rem 5rem; */
+
+      .title {
+        button {
+          background: none;
+          position: absolute;
+          right: 0;
+          top: 1rem;
+          color: white;
+          &:hover {
+            background: none;
+          }
+        }
+      }
 
       input {
         background: transparent;
         padding: 0.5rem;
         border: 0.1rem solid #4e0eff;
-        color: black;
+        color: #ffffff;
         width: 100%;
         font-size: 1rem;
         border-radius: 1rem 0;

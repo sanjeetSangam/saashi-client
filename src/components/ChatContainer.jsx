@@ -4,32 +4,36 @@ import axios from "axios";
 import { ChatInput } from "./ChatInput";
 import { getAllMessagesRoute, host } from "../utils/APIroutes";
 import Avatar from "@mui/material/Avatar";
-
 import { useDispatch } from "react-redux";
-
 import { v4 as uuidv4 } from "uuid";
 
+import mp3 from "../assets/mp3.mp3";
+
+import group from "../assets/group.png";
 // varibales to socket.io
 import { io } from "socket.io-client";
 import { addNotify } from "../redux/notifications/notificationAction";
+import { CircularProgress } from "@mui/material";
 var socket, selectedChatCompare;
 
 export const ChatContainer = ({ currentChat, currentUser }) => {
   const [messages, setMessages] = useState([]);
-  const [socketConnected, setSocketConnected] = useState(false);
+  const [comingMessage, setComingMessage] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   let scrollRef = useRef();
   const dispatch = useDispatch();
+  const [audio] = useState(new Audio(mp3));
 
   useEffect(() => {
     if (currentUser) {
       socket = io(host);
       socket.emit("setup_user", currentUser);
-      socket.on("connection", () => setSocketConnected(true));
     }
   }, [currentUser]);
 
   const getAllMsg = async () => {
+    setLoading(true);
     let token = localStorage.getItem("saashi_token");
 
     if (currentChat) {
@@ -45,7 +49,12 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
           config
         );
 
+        if (!messages.find((c) => c._id === data._id)) {
+        }
+
         setMessages(data);
+        setLoading(false);
+
         socket.emit("join_chat", currentChat._id);
       } catch (err) {
         console.log(err);
@@ -75,8 +84,9 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
             dispatch(addNotify(noti));
           }
         } else {
-          console.log(newMessage);
           setMessages([...messages, newMessage]);
+          setComingMessage(newMessage);
+          audio.play();
         }
       });
     }
@@ -96,13 +106,7 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
             <div className="user-details">
               <div className="avatar">
                 {currentChat.isGroupChat ? (
-                  <Avatar
-                    alt=""
-                    src={
-                      "https://www.pngitem.com/pimgs/m/58-587137_group-of-people-in-a-formation-free-icon.png"
-                    }
-                    sx={{ width: 50, height: 50 }}
-                  />
+                  <Avatar alt="" src={group} sx={{ width: 50, height: 50 }} />
                 ) : (
                   <Avatar
                     alt=""
@@ -134,33 +138,42 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
                 <h5>
                   {messages.length === 0
                     ? "Start Sending Message"
-                    : `Last Updated ${currentChat.updatedAt}`}
+                    : `Last Updated ${new Date(
+                        currentChat.updatedAt
+                      ).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`}
                 </h5>
               </div>
             </div>
           </div>
 
           <div className="chat-messages">
-            {messages.map((msg) => {
-              return (
-                msg.sender &&
-                currentUser && (
-                  <div ref={scrollRef} key={uuidv4()}>
-                    <div
-                      className={`message  ${
-                        msg.sender._id === currentUser._id
-                          ? "sended"
-                          : "recieved"
-                      }`}
-                    >
-                      <div className="content">
-                        <p>{msg.content}</p>
+            {loading ? (
+              <div className="loading">
+                <CircularProgress />
+              </div>
+            ) : (
+              messages &&
+              messages.map((msg) => {
+                return (
+                  msg.sender &&
+                  currentUser && (
+                    <div ref={scrollRef} key={uuidv4()}>
+                      <div
+                        className={`message  ${
+                          msg.sender._id === currentUser._id
+                            ? "sended"
+                            : "recieved"
+                        }`}
+                      >
+                        <div className="content">
+                          <p>{msg.content}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              );
-            })}
+                  )
+                );
+              })
+            )}
           </div>
 
           {/* <Messages /> */}
@@ -182,8 +195,16 @@ const Container = styled.div`
   grid-template-rows: 10% 80% 10%;
   gap: 0.1rem;
   overflow: hidden;
+  position: relative;
   @media screen and (min-width: 720px) and (max-width: 1080px) {
     grid-template-rows: 10% 80% 10%;
+  }
+
+  .loading {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate((-50%, -50%));
   }
 
   .chat-header {
@@ -191,7 +212,7 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 0.2rem 2rem;
-    background: var(--chat-header);
+    background: #202c33;
     text-transform: uppercase;
 
     .user-details {
@@ -220,6 +241,7 @@ const Container = styled.div`
   }
 
   .chat-messages {
+    background: #0b141a;
     padding: 1rem 2rem;
     display: flex;
     flex-direction: column;
@@ -246,7 +268,7 @@ const Container = styled.div`
     .sended {
       justify-content: flex-end;
       .content {
-        background: var(--chat-send);
+        background: #005c4b;
         color: white;
       }
     }
@@ -254,8 +276,8 @@ const Container = styled.div`
     .recieved {
       justify-content: flex-start;
       .content {
-        background: var(--chat-recieve);
-        color: black;
+        background: #202c33;
+        color: #ffffff;
       }
     }
   }

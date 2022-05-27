@@ -7,11 +7,7 @@
 }
 
 :root {
-  --body-color: linear-gradient(
-    rgb(33, 91, 109),
-    rgb(5, 4, 36),
-    rgb(10, 3, 41)
-  );
+  --body-color: #0a1014;
   --logo-bg: #d3e2d3f1;
   --chat-page: #0c0518;
   --chat-header: #530213;

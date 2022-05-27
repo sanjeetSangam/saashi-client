@@ -23,7 +23,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  background: #320329;
+  background: #0c1216;
 
   img {
     max-inline-size: 100%;

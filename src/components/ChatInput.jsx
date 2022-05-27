@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
 
-import { IoMdSend } from "react-icons/io";
 import { BsEmojiSmileFill } from "react-icons/bs";
-
-import mp3 from "../assets/mp3.mp3";
-
 import { sendMessageRoute } from "../utils/APIroutes";
 import axios from "axios";
 
 export const ChatInput = ({
   currentChat,
-  currentUser,
   setMessages,
   messages,
   socket,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [msg, setMsg] = useState("");
-  const [audio] = useState(new Audio(mp3));
+ 
 
   const handleSendMessage = async (event) => {
     event.preventDefault();
@@ -29,6 +24,9 @@ export const ChatInput = ({
         Authorization: `Bearer ${token}`,
       },
     };
+
+    setMsg("");
+    setShowEmojiPicker(false);
 
     const { data } = await axios.post(
       sendMessageRoute,
@@ -40,10 +38,8 @@ export const ChatInput = ({
     );
 
     socket.emit("send_msg", data);
-
     setMessages([...messages, data]);
     setShowEmojiPicker(false);
-    setMsg("");
   };
 
   const handleEmojiPickerBhvr = () => {
@@ -73,10 +69,6 @@ export const ChatInput = ({
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
         />
-
-        <button className="submit">
-          <IoMdSend />
-        </button>
       </form>
     </Container>
   );
@@ -86,7 +78,7 @@ const Container = styled.div`
   display: grid;
   grid-template-columns: 12% 87%;
   align-items: center;
-  background: #160402;
+  background: #202c33;
   /* background: #080420; */
   padding: 0.8rem 0.2rem;
 
@@ -96,21 +88,24 @@ const Container = styled.div`
     justify-content: center;
     color: white;
     gap: 1rem;
+    height: 100%;
 
     .emoji {
       position: relative;
+      box-shadow: none;
+      transition: 0.1s ease-in-out;
       svg {
         font-size: 2rem;
-        color: #ffff00c8;
+        color: #d9d9d4c7;
         cursor: pointer;
       }
 
       .emoji-picker-react {
         position: absolute;
-        bottom: 3rem;
-        box-shadow: 0 5px 10px #9a86f3;
-        border-color: #9a86f3;
-        background: #080420;
+        bottom: 4rem;
+        background: #2a3942;
+        box-shadow: none;
+        transition: 0.1s ease-in-out;
 
         .emoji-scroll-wrapper::-webkit-scrollbar {
           display: none;
@@ -129,7 +124,7 @@ const Container = styled.div`
         }
 
         .emoji-group::before {
-          background: #080420;
+          background: #2a3942;
         }
       }
     }
@@ -137,6 +132,7 @@ const Container = styled.div`
 
   .input-container {
     width: 100%;
+    height: 70%;
     border-radius: 0.5rem;
     display: flex;
     align-items: center;
@@ -145,9 +141,9 @@ const Container = styled.div`
     overflow: hidden;
 
     input {
-      width: 90%;
-      height: 60%;
-      background: transparent;
+      width: 100%;
+      height: 100%;
+      background: #2a3942;
       color: white;
       border: none;
       padding-left: 2rem;
