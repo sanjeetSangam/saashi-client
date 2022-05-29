@@ -1,6 +1,6 @@
 # SASSHI- Chat app
 
-<img src="https://pbs.twimg.com/media/FTq52q9UsAAtf_J?format=jpg&name=large"></img>
+<img src="https://pbs.twimg.com/media/FT7ivZOUcAAS8mN?format=jpg&name=large"></img>
 
 SAASHI is realtime chat app that is created for the chatting with friends.
 
