@@ -172,6 +172,7 @@ export const Chat = () => {
             selectedChatCompare={selectedChatCompare}
             currentChat={currentChat}
             currentUser={currentUser}
+            getChats={getChats}
           />
         )}
       </div>

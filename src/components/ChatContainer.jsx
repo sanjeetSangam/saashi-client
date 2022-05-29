@@ -16,7 +16,7 @@ import { addNotify } from "../redux/notifications/notificationAction";
 import { CircularProgress } from "@mui/material";
 var socket, selectedChatCompare;
 
-export const ChatContainer = ({ currentChat, currentUser }) => {
+export const ChatContainer = ({ currentChat, currentUser, getChats }) => {
   const [messages, setMessages] = useState([]);
   const [comingMessage, setComingMessage] = useState(null);
   const [notifications, setNotifications] = useState([]);
@@ -70,6 +70,7 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
   useEffect(() => {
     if (currentChat) {
       socket.on("recieve", (newMessage) => {
+        getChats();
         if (
           !selectedChatCompare ||
           selectedChatCompare._id !== newMessage.chat._id
@@ -86,6 +87,7 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
         } else {
           setMessages([...messages, newMessage]);
           setComingMessage(newMessage);
+
           audio.play();
         }
       });
@@ -165,9 +167,29 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
                             : "recieved"
                         }`}
                       >
+                        {currentChat.isGroupChat &&
+                          msg.sender._id !== currentUser._id && (
+                            <Avatar
+                              sx={{ width: 18, height: 18 }}
+                              src={msg.sender.avatarImage}
+                            />
+                          )}
+
                         <div className="content">
                           <p>{msg.content}</p>
+                          {currentChat.isGroupChat &&
+                            msg.sender._id !== currentUser._id && (
+                              <small>{msg.sender.first_name}</small>
+                            )}
                         </div>
+
+                        {currentChat.isGroupChat &&
+                          msg.sender._id === currentUser._id && (
+                            <Avatar
+                              sx={{ width: 18, height: 18 }}
+                              src={msg.sender.avatarImage}
+                            />
+                          )}
                       </div>
                     </div>
                   )
@@ -183,6 +205,7 @@ export const ChatContainer = ({ currentChat, currentUser }) => {
             setMessages={setMessages}
             messages={messages}
             socket={socket}
+            getChats={getChats}
           />
         </Container>
       )}
@@ -254,30 +277,47 @@ const Container = styled.div`
     .message {
       display: flex;
       align-items: center;
+      gap: 0.3rem;
 
       .content {
-        max-width: 40%;
-        overflow-wrap: break-word;
-        padding: 1rem;
-        font-size: 1rem;
-        border-radius: 1rem;
         color: #d1d1d1;
+        overflow-wrap: break-word;
+        max-width: 40%;
+
+        p {
+          padding: 1rem;
+          font-size: 1rem;
+          border-radius: 1rem;
+        }
+
+        small {
+          color: #555;
+        }
       }
     }
 
     .sended {
       justify-content: flex-end;
       .content {
-        background: #005c4b;
-        color: white;
+        p {
+          background: #005c4b;
+          color: white;
+        }
       }
     }
 
     .recieved {
       justify-content: flex-start;
       .content {
-        background: #202c33;
-        color: #ffffff;
+        p {
+          background: #202c33;
+          color: #ffffff;
+        }
+
+        small {
+          margin-left: 1rem;
+          margin-top: 1rem;
+        }
       }
     }
   }

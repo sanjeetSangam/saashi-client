@@ -11,10 +11,10 @@ export const ChatInput = ({
   setMessages,
   messages,
   socket,
+  getChats,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [msg, setMsg] = useState("");
- 
 
   const handleSendMessage = async (event) => {
     event.preventDefault();
@@ -40,6 +40,7 @@ export const ChatInput = ({
     socket.emit("send_msg", data);
     setMessages([...messages, data]);
     setShowEmojiPicker(false);
+    getChats();
   };
 
   const handleEmojiPickerBhvr = () => {

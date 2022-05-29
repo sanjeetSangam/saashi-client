@@ -5,6 +5,10 @@ import { IoClose } from "react-icons/io5";
 import axios from "axios";
 import { addGroups } from "../utils/APIroutes";
 
+// error handlers visuals
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import group from "../assets/group.png";
 
 export const Contacts = ({
@@ -24,8 +28,25 @@ export const Contacts = ({
   const [groupName, setGroupName] = useState("");
   const [groupPeople, setGroupPeople] = useState([]);
 
+  // error css
+  const toastOptions = {
+    position: "bottom-right",
+    autoClose: 5000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
+
+  const handleValidation = () => {
+    if (groupPeople.length < 2) {
+      toast.error("2 or more users is required", toastOptions);
+      return false;
+    }
+    return true;
+  };
+
   const changeCurrentChat = (index, contact) => {
-    setCurrentSelected(index);
+    setCurrentSelected(contact._id);
     changeChat(contact);
   };
 
@@ -55,34 +76,38 @@ export const Contacts = ({
 
   const addGroupToChat = async () => {
     let token = localStorage.getItem("saashi_token");
-    console.log(token);
-    try {
-      // let addingGroupData = ;
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
+    if (handleValidation()) {
+      try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        };
 
-      setCurrentChat("");
-      setGroupPeople([]);
-      setShowAddGroup(false);
-      let { data } = await axios.post(
-        addGroups,
-        {
-          name: groupName,
-          users: JSON.stringify(groupPeople.map((u) => u._id)),
-        },
-        config
-      );
+        setShowAddGroup(false);
+        let { data } = await axios.post(
+          addGroups,
+          {
+            name: groupName,
+            users: JSON.stringify(groupPeople.map((u) => u._id)),
+          },
+          config
+        );
 
-      console.log(data);
-      setContacts([data, ...contacts]);
-      //
-    } catch (err) {
-      console.log(err);
+        if (data.status === false) {
+          toast.error(data.message, toastOptions);
+          return;
+        }
+
+        setContacts([data, ...contacts]);
+        setCurrentChat(data);
+        changeChat(data);
+        //
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
@@ -100,7 +125,7 @@ export const Contacts = ({
                 return (
                   <div
                     className={`contact ${
-                      index === currentSelected ? "selected" : ""
+                      contact._id === currentSelected ? "selected" : ""
                     } `}
                     key={index}
                     onClick={() => changeCurrentChat(index, contact)}
@@ -130,6 +155,10 @@ export const Contacts = ({
                     {contact.isGroupChat ? (
                       <div className="username">
                         <h3>{contact.chatName}</h3>
+                        <h5>
+                          {contact.latestMessage &&
+                            contact.latestMessage.content}
+                        </h5>
                       </div>
                     ) : (
                       <div className="username">
@@ -138,6 +167,10 @@ export const Contacts = ({
                             ? contact.users[0].first_name
                             : contact.users[1].first_name}
                         </h3>
+                        <h5>
+                          {contact.latestMessage &&
+                            contact.latestMessage.content}
+                        </h5>
                       </div>
                     )}
                   </div>
@@ -230,6 +263,8 @@ export const Contacts = ({
               </form>
             </div>
           )}
+
+          <ToastContainer />
         </Container>
       )}
     </>
@@ -284,9 +319,17 @@ const Container = styled.div`
       }
 
       .username {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
         h3 {
           color: #f3ecec;
           text-transform: capitalize;
+        }
+
+        h5 {
+          color: #1b6b4a;
         }
       }
     }
