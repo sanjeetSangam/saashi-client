@@ -8,7 +8,7 @@ SAASHI is realtime chat app that is created for the chatting with friends.
 - [sanjeetSangam](https://github.com/sanjeetSangam)
 
 
-# Technologies Used for FRONTEND
+# Technologies Used for SAASHI
 REACTJS <br/>
 NodeJs <br/>
 Mongoose <br/>
