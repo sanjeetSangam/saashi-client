@@ -24,6 +24,7 @@ export const Chat = () => {
   const [search, setSearch] = useState(null);
   const [listOfUsers, setListOfUsers] = useState([]);
   const [showAddGroup, setShowAddGroup] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -47,6 +48,7 @@ export const Chat = () => {
 
   // getAll contacts from server for the user
   const getChats = async (e) => {
+    setLoading(true);
     let token = localStorage.getItem("saashi_token");
 
     try {
@@ -59,6 +61,7 @@ export const Chat = () => {
       const { data } = await axios.get(allChats, config);
 
       setContacts(data);
+      setLoading(false);
       // console.log(data);
     } catch (err) {
       console.log(err);
@@ -75,8 +78,6 @@ export const Chat = () => {
 
   const searchUser = async (e) => {
     e.preventDefault();
-
-    console.log("data");
 
     let token = localStorage.getItem("saashi_token");
 
@@ -163,6 +164,7 @@ export const Chat = () => {
           setSearch={setSearch}
           setContacts={setContacts}
           setCurrentChat={setCurrentChat}
+          loading={loading}
         />
 
         {isLoaded && currentChat === undefined ? (
@@ -173,6 +175,7 @@ export const Chat = () => {
             currentChat={currentChat}
             currentUser={currentUser}
             getChats={getChats}
+            setCurrentChat={setCurrentChat}
           />
         )}
       </div>

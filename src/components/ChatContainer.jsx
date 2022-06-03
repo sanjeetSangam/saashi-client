@@ -14,11 +14,17 @@ import group from "../assets/group.png";
 import { io } from "socket.io-client";
 import { addNotify } from "../redux/notifications/notificationAction";
 import { CircularProgress } from "@mui/material";
+import { EditGroups } from "./EditGroups";
+import { giveLastseen } from "../logic/Lastseen";
 var socket, selectedChatCompare;
 
-export const ChatContainer = ({ currentChat, currentUser, getChats }) => {
+export const ChatContainer = ({
+  currentChat,
+  setCurrentChat,
+  currentUser,
+  getChats,
+}) => {
   const [messages, setMessages] = useState([]);
-  const [comingMessage, setComingMessage] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   let scrollRef = useRef();
@@ -86,7 +92,6 @@ export const ChatContainer = ({ currentChat, currentUser, getChats }) => {
           }
         } else {
           setMessages([...messages, newMessage]);
-          setComingMessage(newMessage);
 
           audio.play();
         }
@@ -98,6 +103,8 @@ export const ChatContainer = ({ currentChat, currentUser, getChats }) => {
     scrollRef.current?.scrollIntoView({
       behaviour: "smooth",
     });
+
+    // console.log(giveLastseen(messages, currentUser));
   }, [messages]);
 
   return (
@@ -138,14 +145,27 @@ export const ChatContainer = ({ currentChat, currentUser, getChats }) => {
                 )}
 
                 <h5>
-                  {messages.length === 0
+                  {currentChat.isGroupChat
+                    ? ""
+                    : messages.length === 0
                     ? "Start Sending Message"
-                    : `Last Updated ${new Date(
-                        currentChat.updatedAt
-                      ).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`}
+                    : `Last seen ${
+                        giveLastseen(messages, currentUser)
+                          ? giveLastseen(messages, currentUser)
+                          : "(wait for message)"
+                      }`}
                 </h5>
               </div>
             </div>
+
+            {currentChat.isGroupChat &&
+              currentChat.groupAdmin._id === currentUser._id && (
+                <EditGroups
+                  setCurrentChat={setCurrentChat}
+                  currentChat={currentChat}
+                  getChats={getChats}
+                />
+              )}
           </div>
 
           <div className="chat-messages">

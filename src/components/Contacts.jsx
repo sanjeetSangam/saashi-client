@@ -4,6 +4,7 @@ import Avatar from "@mui/material/Avatar";
 import { IoClose } from "react-icons/io5";
 import axios from "axios";
 import { addGroups } from "../utils/APIroutes";
+import { CircularProgress } from "@mui/material";
 
 // error handlers visuals
 import { ToastContainer, toast } from "react-toastify";
@@ -23,6 +24,7 @@ export const Contacts = ({
   setSearch,
   setContacts,
   setCurrentChat,
+  loading,
 }) => {
   const [currentSelected, setCurrentSelected] = useState(undefined);
   const [groupName, setGroupName] = useState("");
@@ -120,7 +122,12 @@ export const Contacts = ({
           </div>
 
           <div className="contacts">
-            {contacts.length > 0 &&
+            {loading ? (
+              <div className="loading">
+                <CircularProgress />
+              </div>
+            ) : (
+              contacts.length > 0 &&
               contacts.map((contact, index) => {
                 return (
                   <div
@@ -175,7 +182,8 @@ export const Contacts = ({
                     )}
                   </div>
                 );
-              })}
+              })
+            )}
           </div>
 
           {showAddGroup && (
@@ -291,6 +299,7 @@ const Container = styled.div`
   }
 
   .contacts {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -298,6 +307,13 @@ const Container = styled.div`
     gap: 0.8rem;
     padding-top: 0.7rem;
     background: #111b21;
+
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
 
     &::-webkit-scrollbar {
       display: none;
