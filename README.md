@@ -24,4 +24,5 @@ Github <br/>
 Register with hashed password <br/>
 Login with JWT token and hashed password <br/>
 Personal Chat with existing user on server <br/>
-Group Chat (comming on next release) <br/>
+Group Chat <br/>
+Notification (coming in next release) <br/>
