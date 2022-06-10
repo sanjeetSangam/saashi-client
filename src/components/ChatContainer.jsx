@@ -4,7 +4,7 @@ import axios from "axios";
 import { ChatInput } from "./ChatInput";
 import { getAllMessagesRoute, host } from "../utils/APIroutes";
 import Avatar from "@mui/material/Avatar";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 
 import mp3 from "../assets/mp3.mp3";
@@ -16,6 +16,7 @@ import { addNotify } from "../redux/notifications/notificationAction";
 import { CircularProgress } from "@mui/material";
 import { EditGroups } from "./EditGroups";
 import { giveLastseen } from "../logic/Lastseen";
+import { ViewGroup } from "./ViewGroup";
 var socket, selectedChatCompare;
 
 export const ChatContainer = ({
@@ -29,6 +30,8 @@ export const ChatContainer = ({
   const [loading, setLoading] = useState(true);
   let scrollRef = useRef();
   const dispatch = useDispatch();
+  const noti = useSelector((store) => store.notifyReducer.notifications);
+  // console.log(noti);
   const [audio] = useState(new Audio(mp3));
 
   useEffect(() => {
@@ -82,14 +85,11 @@ export const ChatContainer = ({
           selectedChatCompare._id !== newMessage.chat._id
         ) {
           // notification
-
-          let noti = [];
-
-          if (!noti.includes(newMessage)) {
-            setNotifications([newMessage, ...notifications]);
-            noti.push(newMessage);
-            dispatch(addNotify(noti));
-          }
+          // if (!noti.includes(newMessage.sender._id)) {
+          //   // setNotifications([newMessage, ...notifications]);
+          //   // noti.push(newMessage);
+          //   dispatch(addNotify(newMessage));
+          // }
         } else {
           setMessages([...messages, newMessage]);
 
@@ -159,13 +159,15 @@ export const ChatContainer = ({
             </div>
 
             {currentChat.isGroupChat &&
-              currentChat.groupAdmin._id === currentUser._id && (
-                <EditGroups
-                  setCurrentChat={setCurrentChat}
-                  currentChat={currentChat}
-                  getChats={getChats}
-                />
-              )}
+            currentChat.groupAdmin._id === currentUser._id ? (
+              <EditGroups
+                setCurrentChat={setCurrentChat}
+                currentChat={currentChat}
+                getChats={getChats}
+              />
+            ) : (
+              currentChat.isGroupChat && <ViewGroup currentChat={currentChat} />
+            )}
           </div>
 
           <div className="chat-messages">

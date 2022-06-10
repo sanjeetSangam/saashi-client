@@ -21,12 +21,9 @@ function timeAgo(input) {
 }
 
 export const giveLastseen = (data, user) => {
-  console.log(data);
-
   for (let i = data.length - 1; i >= 0; i--) {
     if (data[i].sender._id !== user._id) {
-      console.log(data[i]);
-      console.log(timeAgo(data[i].createdAt));
+      // console.log(timeAgo(data[i].createdAt));
       return timeAgo(data[i].createdAt);
     }
   }

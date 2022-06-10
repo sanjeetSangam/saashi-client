@@ -2,17 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
-import { addChat, allChats, searchUsers } from "../utils/APIroutes";
+import { addChat, addGroups, allChats, searchUsers } from "../utils/APIroutes";
 import { Contacts } from "../components/Contacts";
 import { Welcome } from "../components/Welcome";
 import { ChatContainer } from "../components/ChatContainer";
 import { IoMdNotifications } from "react-icons/io";
+import { MdContacts } from "react-icons/md";
+
 import logo from "../assets/logo.svg";
 import { Avatar } from "@mui/material";
 import { Logout } from "../components/Logout";
 import { FiSearch } from "react-icons/fi";
 import { BiGroup } from "react-icons/bi";
 import { IoClose } from "react-icons/io5";
+import { toast, ToastContainer } from "react-toastify";
 var selectedChatCompare;
 
 export const Chat = () => {
@@ -25,6 +28,9 @@ export const Chat = () => {
   const [listOfUsers, setListOfUsers] = useState([]);
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [handleContacts, setHandleContacts] = useState(false);
+  const [groupPeople, setGroupPeople] = useState([]);
+  const [groupName, setGroupName] = useState("");
 
   const navigate = useNavigate();
 
@@ -48,7 +54,6 @@ export const Chat = () => {
 
   // getAll contacts from server for the user
   const getChats = async (e) => {
-    setLoading(true);
     let token = localStorage.getItem("saashi_token");
 
     try {
@@ -61,15 +66,27 @@ export const Chat = () => {
       const { data } = await axios.get(allChats, config);
 
       setContacts(data);
-      setLoading(false);
-      // console.log(data);
     } catch (err) {
       console.log(err);
     }
   };
 
   useEffect(() => {
-    getChats();
+    try {
+      let token = localStorage.getItem("saashi_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      axios.get(allChats, config).then(({ data }) => {
+        setContacts(data);
+        setLoading(false);
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }, []);
 
   const handleChatChange = (chat) => {
@@ -128,6 +145,83 @@ export const Chat = () => {
     }
   };
 
+  const toastOptions = {
+    position: "bottom-right",
+    autoClose: 5000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
+
+  const handleValidation = () => {
+    if (groupPeople.length < 2) {
+      toast.error("2 or more users is required", toastOptions);
+      return false;
+    }
+    return true;
+  };
+
+  const addPeopleToGroup = (user, index) => {
+    if (!groupPeople.includes(user)) {
+      setGroupPeople([...groupPeople, user]);
+    }
+  };
+
+  const removefromList = (user) => {
+    // console.log(user);
+
+    let allLists = groupPeople;
+    let lists = listOfUsers;
+
+    let newList = allLists.filter((list) => {
+      return list._id !== user._id;
+    });
+
+    let newLists = lists.filter((list) => {
+      return list._id !== user._id;
+    });
+
+    setListOfUsers(newLists);
+    setGroupPeople(newList);
+  };
+
+  const addGroupToChat = async () => {
+    let token = localStorage.getItem("saashi_token");
+
+    if (handleValidation()) {
+      try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        setShowAddGroup(false);
+        let { data } = await axios.post(
+          addGroups,
+          {
+            name: groupName,
+            users: JSON.stringify(groupPeople.map((u) => u._id)),
+          },
+          config
+        );
+
+        if (data.status === false) {
+          toast.error(data.message, toastOptions);
+          return;
+        }
+
+        setContacts([data, ...contacts]);
+        setCurrentChat(data);
+        handleChatChange(data);
+        //
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
   return (
     <Container>
       <div className="navbar">
@@ -145,7 +239,50 @@ export const Chat = () => {
         </div>
 
         <div className="search">
-          <IoMdNotifications />
+          <div className="showContacts">
+            <div className="contacts__list">
+              <div
+                className={
+                  handleContacts
+                    ? "smallScreenContacts maxContacts"
+                    : "smallScreenContacts"
+                }
+              >
+                {contacts.length > 0 &&
+                  contacts.map((contact, i) => {
+                    return (
+                      <div
+                        className="contacts-s"
+                        key={i}
+                        onClick={() => {
+                          handleChatChange(contact);
+                          setHandleContacts(false);
+                        }}
+                      >
+                        {contact.isGroupChat ? (
+                          <h3>{contact.chatName}</h3>
+                        ) : (
+                          <h3>
+                            {currentUser._id !== contact.users[0]._id
+                              ? contact.users[0].first_name
+                              : contact.users[1].first_name}
+                          </h3>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setHandleContacts(!handleContacts);
+              }}
+            >
+              <MdContacts />
+            </button>
+          </div>
+          {/* <IoMdNotifications /> */}
           <Logout />
           <Avatar src={currentUser && currentUser.avatarImage} />
         </div>
@@ -231,6 +368,94 @@ export const Chat = () => {
           </div>
         </div>
       )}
+
+      {showAddGroup && (
+        <div className="addGroup">
+          <form onSubmit={searchUser}>
+            <div className="group">
+              <h2>Create a new Group </h2>
+              <button
+                onClick={() => {
+                  setShowAddGroup(false);
+                }}
+                className="close"
+              >
+                <IoClose />
+              </button>
+            </div>
+
+            <input
+              type="text"
+              name="group"
+              placeholder="Enter Group Name"
+              onChange={(e) => setGroupName(e.target.value)}
+            />
+
+            <input
+              type="text"
+              name="group"
+              placeholder="Search and add users"
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            <button>Search Users</button>
+
+            <div className="lists">
+              {listOfUsers.length > 0 &&
+                listOfUsers.map((user, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="list"
+                      onClick={() => {
+                        addPeopleToGroup(user, index);
+                      }}
+                    >
+                      <Avatar
+                        alt=""
+                        src={user.avatarImage}
+                        sx={{ width: 35, height: 35 }}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+
+            {groupPeople && (
+              <h3>
+                {groupPeople.length === 0
+                  ? "Add Members in Group"
+                  : "Added in group"}
+              </h3>
+            )}
+            <div className="groupPeople">
+              {groupPeople &&
+                groupPeople.map((user) => {
+                  return (
+                    <div
+                      onClick={() => removefromList(user)}
+                      className="list_of_user"
+                      key={user._id}
+                    >
+                      <h4>{user.first_name}</h4>
+                      <IoClose />
+                    </div>
+                  );
+                })}
+            </div>
+
+            <button
+              onClick={() => {
+                addGroupToChat();
+              }}
+            >
+              Create Group
+            </button>
+          </form>
+        </div>
+      )}
+
+      <ToastContainer />
     </Container>
   );
 };
@@ -392,6 +617,233 @@ const Container = styled.div`
         &:hover {
           background: gray;
           color: #010325;
+        }
+      }
+    }
+  }
+
+  .showContacts {
+    display: none;
+  }
+
+  .current-user {
+    background: #0d0d30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    .avatar {
+      img {
+        height: 2.5rem;
+        max-inline-size: 100%;
+      }
+    }
+
+    .username {
+      h2 {
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+    }
+
+    @media screen and (min-width: 720px) and (max-width: 1080px) {
+      gap: 1rem;
+      .username {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .addGroup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background: #14242f;
+    border-radius: 2rem;
+    padding: 3rem 5rem;
+    z-index: 1000;
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 50vh;
+      max-width: 400px;
+
+      .group {
+        display: flex;
+        button {
+          background: none;
+          position: absolute;
+          right: 1rem;
+          top: 1rem;
+          color: white;
+          &:hover {
+            background: none;
+          }
+        }
+      }
+
+      input {
+        background: transparent;
+        padding: 0.5rem;
+        border: 0.1rem solid #4e0eff;
+        color: #ffffff;
+        width: 100%;
+        font-size: 1rem;
+        border-radius: 1rem 0;
+
+        &:focus {
+          border: 0.1rem solid #997af0;
+          outline: none;
+        }
+      }
+    }
+
+    button {
+      background: #997af0;
+      color: white;
+      padding: 0.5rem;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 1rem 0;
+      /* font-size: 1rem; */
+      transition: 0.5s ease-in-out;
+      border: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: #4e0eff;
+      }
+    }
+
+    .lists {
+      display: flex;
+      gap: 1rem;
+      overflow: auto;
+      max-height: 50vh;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .list {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: white;
+        cursor: pointer;
+        transition: 0.2s ease-in-out;
+      }
+    }
+  }
+  .groupPeople {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 0.5rem;
+  }
+
+  .list_of_user {
+    display: flex;
+    background: white;
+    color: #111b21;
+    padding: 0.5rem;
+  }
+
+  @media screen and (max-width: 800px) {
+    .container {
+      grid-template-columns: 100%;
+    }
+
+    .addGroup {
+      padding: 3rem 2rem;
+      min-width: 70%;
+      form {
+        min-width: 100%;
+      }
+    }
+
+    .brand h2 {
+      display: none;
+    }
+
+    .showContacts {
+      display: flex;
+      place-items: center;
+      position: relative;
+
+      button {
+        padding: 0.5rem;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+      }
+
+      .contacts__list {
+        position: relative;
+      }
+
+      .smallScreenContacts {
+        transition: 0.3s ease-in-out;
+        opacity: 0;
+        visibility: hidden;
+        height: 0;
+        position: absolute;
+        top: 1rem;
+        z-index: 5000;
+        left: 0;
+
+        .contacts-s {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          width: 100%;
+
+          h3 {
+            padding: 0.5rem 2rem;
+            width: 100%;
+            background: white;
+            margin-top: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            z-index: 5000;
+            cursor: pointer;
+            color: black;
+            font-size: 1rem;
+            transition: 0.2s ease-in-out;
+          }
+
+          h3:hover {
+            background: #400246;
+            color: white;
+          }
+        }
+      }
+
+      .smallScreenContacts.maxContacts {
+        height: auto;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(10px);
+        background: #0b062c;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+
+        h3 {
+          height: auto;
+          opacity: 1;
+          visibility: visible;
         }
       }
     }
