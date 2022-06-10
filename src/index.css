@@ -33,3 +33,9 @@ body {
   overflow: hidden;
   background: var(--body-color);
 }
+
+@media screen and (max-width: 800px) {
+  body {
+    overflow: auto;
+  }
+}

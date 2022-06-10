@@ -758,8 +758,17 @@ const Container = styled.div`
   }
 
   @media screen and (max-width: 800px) {
+    .navbar {
+      width: 100%;
+      border-radius: 0;
+    }
+
     .container {
       grid-template-columns: 100%;
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      border-radius: 0;
     }
 
     .addGroup {

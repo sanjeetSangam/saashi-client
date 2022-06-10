@@ -128,7 +128,7 @@ export const Login = () => {
 
 const FormContainer = styled.div`
   height: 100vh;
-  width: 100vw;
+  min-width: 100vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -201,6 +201,13 @@ const FormContainer = styled.div`
         text-decoration: none;
         font-weight: bold;
       }
+    }
+  }
+
+  @media screen and (max-width: 800px) {
+    form {
+      width: 75%;
+      padding: 2rem 2rem;
     }
   }
 `;

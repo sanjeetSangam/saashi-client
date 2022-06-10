@@ -147,6 +147,7 @@ const Container = styled.div`
       background: #2a3942;
       color: white;
       border: none;
+      padding: 0.5rem;
       padding-left: 2rem;
       display: flex;
       align-items: center;

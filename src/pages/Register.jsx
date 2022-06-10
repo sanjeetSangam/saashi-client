@@ -174,6 +174,7 @@ export const Register = () => {
 
 const FormContainer = styled.div`
   height: 100vh;
+  overflow: auto;
   width: 100vw;
   display: flex;
   flex-direction: column;
@@ -247,6 +248,13 @@ const FormContainer = styled.div`
         text-decoration: none;
         font-weight: bold;
       }
+    }
+  }
+
+  @media screen and (max-width: 800px) {
+    form {
+      width: 75%;
+      padding: 2rem 2rem;
     }
   }
 `;

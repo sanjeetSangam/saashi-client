@@ -77,7 +77,6 @@ export const SetAvatar = () => {
       });
 
       if (data.isSet) {
-
         user.isAvatarImageSet = true;
         user.avatarImage = data.image;
 
@@ -230,6 +229,13 @@ const FormContainer = styled.div`
         text-decoration: none;
         font-weight: bold;
       }
+    }
+  }
+
+  @media screen and (max-width: 800px) {
+    form {
+      width: 75%;
+      padding: 2rem 2rem;
     }
   }
 `;

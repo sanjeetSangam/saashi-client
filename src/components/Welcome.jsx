@@ -1,7 +1,7 @@
 import React from "react";
 
 import styled from "styled-components";
-import robot from "../assets/robot.gif";
+import robot from "../assets/cute1.gif";
 
 export const Welcome = ({ currentUser }) => {
   return (
