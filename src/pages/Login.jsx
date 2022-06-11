@@ -17,6 +17,8 @@ import { loginRoute } from "../utils/APIroutes";
 import { useDispatch } from "react-redux";
 import { addUser } from "../redux/users/userAction";
 
+import CircularProgress from "@mui/material/CircularProgress";
+
 export const Login = () => {
   // values input
   const [values, setValues] = useState({
@@ -27,6 +29,7 @@ export const Login = () => {
   // navigate
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   // error css
   const toastOptions = {
@@ -48,6 +51,8 @@ export const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (handleValidation()) {
+      setIsLoading(true);
+
       const { password, username } = values;
       const { data } = await axios.post(loginRoute, {
         username,
@@ -64,6 +69,8 @@ export const Login = () => {
         localStorage.setItem("saashi_token", data.token);
 
         dispatch(addUser(data));
+        toast.success("Login Success", toastOptions);
+        setIsLoading(false);
         navigate("/");
       }
     }
@@ -114,7 +121,10 @@ export const Login = () => {
             name="password"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit"> Login </button>
+          <button type="submit" disabled={isLoading}>
+            {" "}
+            {isLoading ? <CircularProgress disableShrink /> : "Login"}{" "}
+          </button>
 
           <span>
             Don't have an account ? <Link to="/register">Register</Link>
@@ -147,7 +157,7 @@ const FormContainer = styled.div`
     }
 
     h1 {
-      color: #380917;
+      color: var(--form-h1);
       text-transform: uppercase;
     }
   }
@@ -159,12 +169,13 @@ const FormContainer = styled.div`
     background: var(--form-color);
     border-radius: 2rem;
     padding: 3rem 5rem;
+    box-shadow: var(--form-box-shd);
 
     input {
       background: transparent;
       padding: 1rem;
       border: 0.1rem solid #4e0eff;
-      color: black;
+      color: var(--form-input);
       width: 100%;
       font-size: 1rem;
       border-radius: 1rem 0;
@@ -176,7 +187,7 @@ const FormContainer = styled.div`
     }
 
     button {
-      background: #997af0;
+      background: var(--form-button);
       color: white;
       padding: 1rem 2rem;
       cursor: pointer;

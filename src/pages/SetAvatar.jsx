@@ -77,11 +77,12 @@ export const SetAvatar = () => {
       });
 
       if (data.isSet) {
+        toast.success("User Created", toastOptions);
         user.isAvatarImageSet = true;
         user.avatarImage = data.image;
 
-        localStorage.setItem("saashi-user", JSON.stringify(user));
-        navigate("/");
+        localStorage.removeItem("saashi-user", JSON.stringify(user));
+        navigate("/login");
       } else {
         toast.error("Please Try Again", toastOptions);
       }
@@ -164,7 +165,7 @@ const FormContainer = styled.div`
     }
 
     h1 {
-      color: #380917;
+      color: var(--form-h1);
       text-transform: uppercase;
     }
   }
@@ -177,6 +178,7 @@ const FormContainer = styled.div`
     background: var(--form-color);
     border-radius: 2rem;
     padding: 3rem 5rem;
+    box-shadow: var(--form-box-shd);
 
     .show__profile {
       display: flex;
@@ -187,7 +189,7 @@ const FormContainer = styled.div`
       background: transparent;
       padding: 1rem;
       border: 0.1rem solid #4e0eff;
-      color: black;
+      color: var(--form-input);
       width: max-content;
       max-width: 15rem;
       font-size: 1rem;
@@ -199,8 +201,12 @@ const FormContainer = styled.div`
       }
     }
 
+    h2 {
+      color: var(--form-h1);
+    }
+
     button {
-      background: #997af0;
+      background: var(--form-button);
       color: white;
       padding: 1rem 2rem;
       cursor: pointer;

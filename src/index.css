@@ -7,18 +7,32 @@
 }
 
 :root {
-  --body-color: #0a1014;
+  --body-color: #011622;
   --logo-bg: #d3e2d3f1;
-  --chat-page: #0c0518;
   --chat-header: #530213;
   --chat-recieve: #0fff;
   --chat-send: rgb(11, 10, 39);
-  --form-color: linear-gradient(
-    rgb(21, 98, 129),
-    rgb(255, 255, 255),
-    rgb(36, 5, 39)
-  );
-  --form-bg: linear-gradient(rgb(55, 90, 143), rgb(0, 0, 2));
+  --form-color: linear-gradient(to bottom, rgb(32, 3, 28), rgb(3, 1, 24));
+  --form-bg: #f0f45f00;
+  --form-h1: #ffff;
+  --form-input: #ffff;
+  --form-button: #f552;
+  --form-box-shd: rgba(0, 0, 0, 0.705) 0px 5px 15px;
+
+  /* chat */
+
+  /* --chat-primary: #202c33;
+  --chat-secodary: #111b21;
+  --chat-container: #0c1216;
+  --chat-hg: #2a3942;
+  --hover : #354854; */
+
+  --chat-primary: #00283f;
+  --chat-secodary: #00182c;
+  /* --chat-secodary: linear-gradient(to top, rgb(1, 2, 14), transparent); */
+  --chat-container: #041b24;
+  --chat-hg: #07213f;
+  --hover: #03283f;
 }
 
 body,

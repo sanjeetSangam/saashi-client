@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Avatar from "@mui/material/Avatar";
-import { IoClose } from "react-icons/io5";
-import axios from "axios";
-import { addGroups } from "../utils/APIroutes";
 import { CircularProgress } from "@mui/material";
 
 // error handlers visuals
@@ -16,19 +13,9 @@ export const Contacts = ({
   contacts,
   currentUser,
   changeChat,
-  listOfUsers,
-  setListOfUsers,
-  showAddGroup,
-  setShowAddGroup,
-  searchChat,
-  setSearch,
-  setContacts,
-  setCurrentChat,
   loading,
 }) => {
   const [currentSelected, setCurrentSelected] = useState(undefined);
-  const [groupName, setGroupName] = useState("");
-  const [groupPeople, setGroupPeople] = useState([]);
 
   // error css
   const changeCurrentChat = (index, contact) => {
@@ -120,7 +107,7 @@ const Container = styled.div`
   display: grid;
   grid-template-rows: 10% 90%;
   overflow: hidden;
-  background: #202c33;
+  background: var(--chat-primary);
   border-right: 0.01px solid #404040;
   /* position: relative; */
 
@@ -143,7 +130,7 @@ const Container = styled.div`
     overflow: auto;
     gap: 0.8rem;
     padding-top: 0.7rem;
-    background: #111b21;
+    background: var(--chat-secodary);
 
     .loading {
       position: absolute;
@@ -168,7 +155,7 @@ const Container = styled.div`
       transition: 0.1s ease-in-out;
 
       &:hover {
-        background: #354854;
+        background: var(--hover);
       }
 
       .username {
@@ -188,7 +175,7 @@ const Container = styled.div`
     }
 
     .selected {
-      background: #2a3942;
+      background: var(--chat-hg);
 
       .username {
         h3 {

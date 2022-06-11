@@ -79,8 +79,7 @@ const Container = styled.div`
   display: grid;
   grid-template-columns: 12% 87%;
   align-items: center;
-  background: #202c33;
-  /* background: #080420; */
+  background: var(--chat-primary);
   padding: 0.8rem 0.2rem;
 
   .button-container {
@@ -133,18 +132,17 @@ const Container = styled.div`
 
   .input-container {
     width: 100%;
-    height: 70%;
-    border-radius: 0.5rem;
+    height: 75%;
+    border-radius: 0.5rem 0;
     display: flex;
     align-items: center;
     gap: 2rem;
-    background: #ffffff34;
     overflow: hidden;
 
     input {
       width: 100%;
       height: 100%;
-      background: #2a3942;
+      background: var(--chat-hg);
       color: white;
       border: none;
       padding: 0.5rem;

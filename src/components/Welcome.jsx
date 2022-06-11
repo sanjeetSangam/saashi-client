@@ -23,7 +23,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  background: #0c1216;
+  background: var(--chat-container);
 
   img {
     max-inline-size: 100%;

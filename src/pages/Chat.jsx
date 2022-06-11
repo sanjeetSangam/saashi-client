@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
-import { addChat, addGroups, allChats, searchUsers } from "../utils/APIroutes";
+import { addChat, allChats, searchUsers } from "../utils/APIroutes";
 import { Contacts } from "../components/Contacts";
 import { Welcome } from "../components/Welcome";
 import { ChatContainer } from "../components/ChatContainer";
@@ -16,6 +16,7 @@ import { FiSearch } from "react-icons/fi";
 import { BiGroup } from "react-icons/bi";
 import { IoClose } from "react-icons/io5";
 import { toast, ToastContainer } from "react-toastify";
+import { AddGroups } from "../components/AddGroups";
 var selectedChatCompare;
 
 export const Chat = () => {
@@ -29,8 +30,6 @@ export const Chat = () => {
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [handleContacts, setHandleContacts] = useState(false);
-  const [groupPeople, setGroupPeople] = useState([]);
-  const [groupName, setGroupName] = useState("");
 
   const navigate = useNavigate();
 
@@ -153,75 +152,6 @@ export const Chat = () => {
     theme: "dark",
   };
 
-  const handleValidation = () => {
-    if (groupPeople.length < 2) {
-      toast.error("2 or more users is required", toastOptions);
-      return false;
-    }
-    return true;
-  };
-
-  const addPeopleToGroup = (user, index) => {
-    if (!groupPeople.includes(user)) {
-      setGroupPeople([...groupPeople, user]);
-    }
-  };
-
-  const removefromList = (user) => {
-    // console.log(user);
-
-    let allLists = groupPeople;
-    let lists = listOfUsers;
-
-    let newList = allLists.filter((list) => {
-      return list._id !== user._id;
-    });
-
-    let newLists = lists.filter((list) => {
-      return list._id !== user._id;
-    });
-
-    setListOfUsers(newLists);
-    setGroupPeople(newList);
-  };
-
-  const addGroupToChat = async () => {
-    let token = localStorage.getItem("saashi_token");
-
-    if (handleValidation()) {
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        setShowAddGroup(false);
-        let { data } = await axios.post(
-          addGroups,
-          {
-            name: groupName,
-            users: JSON.stringify(groupPeople.map((u) => u._id)),
-          },
-          config
-        );
-
-        if (data.status === false) {
-          toast.error(data.message, toastOptions);
-          return;
-        }
-
-        setContacts([data, ...contacts]);
-        setCurrentChat(data);
-        handleChatChange(data);
-        //
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
-
   return (
     <Container>
       <div className="navbar">
@@ -293,14 +223,6 @@ export const Chat = () => {
           contacts={contacts}
           currentUser={currentUser}
           changeChat={handleChatChange}
-          listOfUsers={listOfUsers}
-          setListOfUsers={setListOfUsers}
-          showAddGroup={showAddGroup}
-          setShowAddGroup={setShowAddGroup}
-          searchChat={searchUser}
-          setSearch={setSearch}
-          setContacts={setContacts}
-          setCurrentChat={setCurrentChat}
           loading={loading}
         />
 
@@ -369,91 +291,14 @@ export const Chat = () => {
         </div>
       )}
 
-      {showAddGroup && (
-        <div className="addGroup">
-          <form onSubmit={searchUser}>
-            <div className="group">
-              <h2>Create a new Group </h2>
-              <button
-                onClick={() => {
-                  setShowAddGroup(false);
-                }}
-                className="close"
-              >
-                <IoClose />
-              </button>
-            </div>
-
-            <input
-              type="text"
-              name="group"
-              placeholder="Enter Group Name"
-              onChange={(e) => setGroupName(e.target.value)}
-            />
-
-            <input
-              type="text"
-              name="group"
-              placeholder="Search and add users"
-              onChange={(e) => setSearch(e.target.value)}
-            />
-
-            <button>Search Users</button>
-
-            <div className="lists">
-              {listOfUsers.length > 0 &&
-                listOfUsers.map((user, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="list"
-                      onClick={() => {
-                        addPeopleToGroup(user, index);
-                      }}
-                    >
-                      <Avatar
-                        alt=""
-                        src={user.avatarImage}
-                        sx={{ width: 35, height: 35 }}
-                      />
-                    </div>
-                  );
-                })}
-            </div>
-
-            {groupPeople && (
-              <h3>
-                {groupPeople.length === 0
-                  ? "Add Members in Group"
-                  : "Added in group"}
-              </h3>
-            )}
-            <div className="groupPeople">
-              {groupPeople &&
-                groupPeople.map((user) => {
-                  return (
-                    <div
-                      onClick={() => removefromList(user)}
-                      className="list_of_user"
-                      key={user._id}
-                    >
-                      <h4>{user.first_name}</h4>
-                      <IoClose />
-                    </div>
-                  );
-                })}
-            </div>
-
-            <button
-              onClick={() => {
-                addGroupToChat();
-              }}
-            >
-              Create Group
-            </button>
-          </form>
-        </div>
-      )}
+      <AddGroups
+        setCurrentChat={setCurrentChat}
+        contacts={contacts}
+        setContacts={setContacts}
+        handleChatChange={handleChatChange}
+        setShowAddGroup={setShowAddGroup}
+        showAddGroup={showAddGroup}
+      />
 
       <ToastContainer />
     </Container>
@@ -474,7 +319,7 @@ const Container = styled.div`
     padding: 1rem;
     color: #fefefe;
     width: 90vw;
-    background: #202c33;
+    background: var(--chat-primary);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -522,7 +367,6 @@ const Container = styled.div`
   .container {
     height: 85vh;
     width: 90vw;
-    background: var(--chat-page);
     display: grid;
     grid-template-columns: 25% 75%;
     border-radius: 0 0 1.5rem 0;
@@ -545,6 +389,7 @@ const Container = styled.div`
     border-radius: 2rem;
     padding: 3rem 5rem;
     color: white;
+    box-shadow: var(--form-box-shd);
 
     form {
       display: flex;
@@ -581,7 +426,7 @@ const Container = styled.div`
       }
 
       button {
-        background: #997af0;
+        background: var(--form-button);
         color: white;
         padding: 0.5rem 2rem;
         cursor: pointer;
@@ -626,137 +471,6 @@ const Container = styled.div`
     display: none;
   }
 
-  .current-user {
-    background: #0d0d30;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-
-    .avatar {
-      img {
-        height: 2.5rem;
-        max-inline-size: 100%;
-      }
-    }
-
-    .username {
-      h2 {
-        color: white;
-        font-weight: bold;
-        text-transform: uppercase;
-      }
-    }
-
-    @media screen and (min-width: 720px) and (max-width: 1080px) {
-      gap: 1rem;
-      .username {
-        font-size: 1rem;
-      }
-    }
-  }
-
-  .addGroup {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    background: #14242f;
-    border-radius: 2rem;
-    padding: 3rem 5rem;
-    z-index: 1000;
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-height: 50vh;
-      max-width: 400px;
-
-      .group {
-        display: flex;
-        button {
-          background: none;
-          position: absolute;
-          right: 1rem;
-          top: 1rem;
-          color: white;
-          &:hover {
-            background: none;
-          }
-        }
-      }
-
-      input {
-        background: transparent;
-        padding: 0.5rem;
-        border: 0.1rem solid #4e0eff;
-        color: #ffffff;
-        width: 100%;
-        font-size: 1rem;
-        border-radius: 1rem 0;
-
-        &:focus {
-          border: 0.1rem solid #997af0;
-          outline: none;
-        }
-      }
-    }
-
-    button {
-      background: #997af0;
-      color: white;
-      padding: 0.5rem;
-      cursor: pointer;
-      font-weight: bold;
-      text-transform: uppercase;
-      border-radius: 1rem 0;
-      /* font-size: 1rem; */
-      transition: 0.5s ease-in-out;
-      border: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      &:hover {
-        background: #4e0eff;
-      }
-    }
-
-    .lists {
-      display: flex;
-      gap: 1rem;
-      overflow: auto;
-      max-height: 50vh;
-      &::-webkit-scrollbar {
-        display: none;
-      }
-
-      .list {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        color: white;
-        cursor: pointer;
-        transition: 0.2s ease-in-out;
-      }
-    }
-  }
-  .groupPeople {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    gap: 0.5rem;
-  }
-
-  .list_of_user {
-    display: flex;
-    background: white;
-    color: #111b21;
-    padding: 0.5rem;
-  }
-
   @media screen and (max-width: 800px) {
     .navbar {
       width: 100%;
@@ -769,14 +483,6 @@ const Container = styled.div`
       width: 100%;
       overflow: auto;
       border-radius: 0;
-    }
-
-    .addGroup {
-      padding: 3rem 2rem;
-      min-width: 70%;
-      form {
-        min-width: 100%;
-      }
     }
 
     .brand h2 {
@@ -823,6 +529,7 @@ const Container = styled.div`
             width: 100%;
             background: white;
             margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
             opacity: 0;
             visibility: hidden;
             height: 0;
@@ -842,12 +549,18 @@ const Container = styled.div`
 
       .smallScreenContacts.maxContacts {
         height: auto;
+        max-height: 50vh;
         opacity: 1;
         visibility: visible;
         transform: translateY(10px);
         background: #0b062c;
         padding: 0.5rem;
         border-radius: 0.5rem;
+        overflow: auto;
+
+        ::-webkit-scrollbar {
+          display: none;
+        }
 
         h3 {
           height: auto;

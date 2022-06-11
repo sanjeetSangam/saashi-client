@@ -257,7 +257,7 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 0.2rem 2rem;
-    background: #202c33;
+    background: var(--chat-primary);
     text-transform: uppercase;
 
     .user-details {
@@ -286,7 +286,7 @@ const Container = styled.div`
   }
 
   .chat-messages {
-    background: #0b141a;
+    background: var(--chat-container);
     padding: 1rem 2rem;
     display: flex;
     flex-direction: column;
