@@ -43,7 +43,7 @@ export const SetAvatar = () => {
   const postImage = async (formData) => {
     try {
       const response = await axios.post(
-        "https://api.cloudinary.com/v1_1/dn2zbluhc/upload",
+        process.env.REACT_APP_IMAGE_LINK,
         formData
       );
       // console.log(response.data);
