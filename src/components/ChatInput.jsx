@@ -16,6 +16,7 @@ export const ChatInput = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [msg, setMsg] = useState("");
 
+  // send message to DB and socket
   const handleSendMessage = async (event) => {
     event.preventDefault();
     let token = localStorage.getItem("saashi_token");

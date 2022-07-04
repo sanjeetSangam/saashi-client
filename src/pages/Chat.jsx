@@ -43,6 +43,7 @@ export const Chat = () => {
     }
   }, []);
 
+  // if there id user not having avatar, send to setAvatar page
   useEffect(() => {
     if (currentUser) {
       if (!currentUser.isAvatarImageSet) {
@@ -51,7 +52,7 @@ export const Chat = () => {
     }
   }, [currentUser]);
 
-  // getAll contacts from server for the user
+  // getAll function that is called in required place to update fields contacts from server for the user
   const getChats = async (e) => {
     let token = localStorage.getItem("saashi_token");
 
@@ -70,6 +71,7 @@ export const Chat = () => {
     }
   };
 
+  // to get all inital chats that is created already at first
   useEffect(() => {
     try {
       let token = localStorage.getItem("saashi_token");
@@ -92,6 +94,7 @@ export const Chat = () => {
     setCurrentChat(chat);
   };
 
+  // search user and add to list of searched user
   const searchUser = async (e) => {
     e.preventDefault();
 
@@ -117,6 +120,7 @@ export const Chat = () => {
     }
   };
 
+  // creating chat from search and adding it to the chat list in contact
   const addChatToList = async (user, index) => {
     let token = localStorage.getItem("saashi_token");
 

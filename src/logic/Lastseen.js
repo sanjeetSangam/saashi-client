@@ -20,6 +20,7 @@ function timeAgo(input) {
   }
 }
 
+// last seen
 export const giveLastseen = (data, user) => {
   for (let i = data.length - 1; i >= 0; i--) {
     if (data[i].sender._id !== user._id) {

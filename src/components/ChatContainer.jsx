@@ -10,13 +10,17 @@ import { v4 as uuidv4 } from "uuid";
 import mp3 from "../assets/mp3.mp3";
 
 import group from "../assets/group.png";
-// varibales to socket.io
+
+// io from socket.io
 import { io } from "socket.io-client";
+
 import { addNotify } from "../redux/notifications/notificationAction";
 import { CircularProgress } from "@mui/material";
 import { EditGroups } from "./EditGroups";
 import { giveLastseen } from "../logic/Lastseen";
 import { ViewGroup } from "./ViewGroup";
+
+// some variables for socket.io
 var socket, selectedChatCompare;
 
 export const ChatContainer = ({
@@ -34,6 +38,7 @@ export const ChatContainer = ({
   // console.log(noti);
   const [audio] = useState(new Audio(mp3));
 
+  // if there is currentUser, then set the socket with host and send user to socket for making the connection
   useEffect(() => {
     if (currentUser) {
       socket = io(host);
@@ -41,6 +46,8 @@ export const ChatContainer = ({
     }
   }, [currentUser]);
 
+
+  // getting all the messages from the server
   const getAllMsg = async () => {
     setLoading(true);
     let token = localStorage.getItem("saashi_token");
@@ -71,11 +78,15 @@ export const ChatContainer = ({
     }
   };
 
+  // if there is current chat, get the existing messages if already there in database, and set the compare selected chat
   useEffect(() => {
     getAllMsg();
     selectedChatCompare = currentChat;
   }, [currentChat]);
 
+
+  // used for getting realtime chat with socket and updating all the messages also from DB and playing tone,
+  //  renders everytime when the new messages arrives
   useEffect(() => {
     if (currentChat) {
       socket.on("recieve", (newMessage) => {
@@ -99,6 +110,7 @@ export const ChatContainer = ({
     }
   });
 
+  // to scroll into latest message that arrives with smooth animation
   useEffect(() => {
     scrollRef.current?.scrollIntoView({
       behaviour: "smooth",

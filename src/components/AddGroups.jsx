@@ -19,6 +19,7 @@ export const AddGroups = ({
   const [search, setSearch] = useState(null);
   const [listOfUsers, setListOfUsers] = useState([]);
 
+  // toast css
   const toastOptions = {
     position: "bottom-right",
     autoClose: 5000,
@@ -27,6 +28,7 @@ export const AddGroups = ({
     theme: "dark",
   };
 
+  // toast validation
   const handleValidation = () => {
     if (groupPeople.length < 2) {
       toast.error("2 or more users is required", toastOptions);
@@ -35,6 +37,7 @@ export const AddGroups = ({
     return true;
   };
 
+  // search people from DB for adding in group
   const searchUser = async (e) => {
     e.preventDefault();
 
@@ -60,14 +63,15 @@ export const AddGroups = ({
     }
   };
 
+  // adding people to showing box 
   const addPeopleToGroup = (user, index) => {
     if (!groupPeople.includes(user)) {
       setGroupPeople([...groupPeople, user]);
     }
   };
 
+  // click and remove from box of people
   const removefromList = (user) => {
-    // console.log(user);
 
     let allLists = groupPeople;
     let lists = listOfUsers;
@@ -84,6 +88,7 @@ export const AddGroups = ({
     setGroupPeople(newList);
   };
 
+  // and finnaly, add group to chats
   const addGroupToChat = async () => {
     let token = localStorage.getItem("saashi_token");
 

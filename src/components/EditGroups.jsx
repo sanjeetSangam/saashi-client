@@ -29,11 +29,13 @@ export const EditGroups = ({ currentChat, setCurrentChat, getChats }) => {
     theme: "dark",
   };
 
+  // setting initial values of group
   useEffect(() => {
     setGroupName(currentChat.chatName);
     setCurrentuser(JSON.parse(localStorage.getItem("saashi-user")));
   }, []);
 
+  // search and show people from DB
   const searchUser = async (e) => {
     setValueUser(e.target.value);
     let token = localStorage.getItem("saashi_token");
@@ -56,11 +58,13 @@ export const EditGroups = ({ currentChat, setCurrentChat, getChats }) => {
     }
   };
 
+  // click and add to group
   const addUser = async (userData) => {
     let token = localStorage.getItem("saashi_token");
 
     let flag = false;
 
+    // check if the user already in group
     currentChat.users.find((e) => {
       if (userData._id === e._id) {
         toast.error("User Already exists", toastOptions);
@@ -69,6 +73,7 @@ export const EditGroups = ({ currentChat, setCurrentChat, getChats }) => {
       }
     });
 
+    // if not already, then add to group
     if (!flag) {
       try {
         const config = {
@@ -91,6 +96,7 @@ export const EditGroups = ({ currentChat, setCurrentChat, getChats }) => {
     }
   };
 
+  // click and remove from group
   const removeUser = async (userData) => {
     try {
       let token = localStorage.getItem("saashi_token");
@@ -118,6 +124,8 @@ export const EditGroups = ({ currentChat, setCurrentChat, getChats }) => {
     }
   };
 
+
+  // rename group
   const renamegroup = async () => {
     let token = localStorage.getItem("saashi_token");
     console.log(token);

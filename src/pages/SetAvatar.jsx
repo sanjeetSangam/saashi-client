@@ -10,12 +10,14 @@ import logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// route
 import { setAvatarRoute } from "../utils/APIroutes";
 
+// mui imports
 import Avatar from "@mui/material/Avatar";
-
 import CircularProgress from "@mui/material/CircularProgress";
 
+// component
 export const SetAvatar = () => {
   const [user, setUser] = useState({});
   const [selectedImage, setSeletedImage] = useState([]);
@@ -33,6 +35,7 @@ export const SetAvatar = () => {
     theme: "dark",
   };
 
+  // check if user id logged in or not by local storage if not, then send to login page at first
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem("saashi-user")));
     if (!localStorage.getItem("saashi-user")) {
@@ -40,6 +43,17 @@ export const SetAvatar = () => {
     }
   }, []);
 
+  // get form data and sent to function to upload image to cloudinary
+  const uploadImage = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const formData = new FormData();
+    formData.append("file", selectedImage);
+    formData.append("upload_preset", "saashi-chat");
+    postImage(formData);
+  };
+
+  // function to upload in clodinary
   const postImage = async (formData) => {
     try {
       const response = await axios.post(
@@ -55,15 +69,7 @@ export const SetAvatar = () => {
     }
   };
 
-  const uploadImage = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const formData = new FormData();
-    formData.append("file", selectedImage);
-    formData.append("upload_preset", "saashi-chat");
-    postImage(formData);
-  };
-
+  // final step to setAvatar url to database in mongodb
   const setProfilePicture = async (e) => {
     e.preventDefault();
     if (selectedAvatar === undefined) {
@@ -76,6 +82,7 @@ export const SetAvatar = () => {
         image: selectedAvatar,
       });
 
+      // check if the avatar is set then, send to login page
       if (data.isSet) {
         toast.success("User Created", toastOptions);
         user.isAvatarImageSet = true;
