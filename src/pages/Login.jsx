@@ -61,6 +61,7 @@ export const Login = () => {
 
       if (data.status === false) {
         toast.error(data.message, toastOptions);
+        setIsLoading(false);
       }
 
       if (data.status === true) {

@@ -63,6 +63,7 @@ export const Register = () => {
 
       if (data.status === false) {
         toast.error(data.message, toastOptions);
+        setIsLoading(false);
       }
 
       if (data.status === true) {
